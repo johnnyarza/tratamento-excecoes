@@ -4,21 +4,26 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import model.exceptions.DomainException;
+
 public class Reservation {
 
 	private Integer roomNumber;
-	private Date checkin;
-	private Date checkout;
+	private Date checkIn;
+	private Date checkOut;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
 	public Reservation() {
 
 	}
 
-	public Reservation(Integer roomNumber, Date checkin, Date checkout) {
+	public Reservation(Integer roomNumber, Date checkIn, Date checkOut)  {
+		if (!checkOut.after(checkIn)) {
+			throw new DomainException("Checkout muste be after checkin");
+		}
 		this.roomNumber = roomNumber;
-		this.checkin = checkin;
-		this.checkout = checkout;
+		this.checkIn = checkIn;
+		this.checkOut = checkOut;
 	}
 
 	public Integer getRoomNumber() {
@@ -30,35 +35,35 @@ public class Reservation {
 	}
 
 	public Date getCheckin() {
-		return checkin;
+		return checkIn;
 	}
 
 	public Date getCheckout() {
-		return checkout;
+		return checkOut;
 	}
 
 	public long duration() {
-		long diff = checkout.getTime() - checkin.getTime();
+		long diff = checkOut.getTime() - checkIn.getTime();
 		return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 	}
 
-	public String updateDates(Date checkIn, Date checkOut) {
+	public void updateDates(Date checkIn, Date checkOut)  {
 		
 		Date now = new Date();
 		if (checkIn.before(now) || (checkOut.before(now))) {
-			return "Reservation dates for update must be future dates";
+			throw new DomainException("Reservation dates for update must be future dates");
 		} 
 		if (!checkOut.after(checkIn)) {
-			return "Checkout muste be after checkin";
+			throw new DomainException("Checkout muste be after checkin");
 		}
-		this.checkin = checkIn;
-		this.checkout = checkOut;
-		return null;
+		this.checkIn = checkIn;
+		this.checkOut = checkOut;
+		
 	}
 
 	@Override
 	public String toString() {
-		return "Room " + roomNumber + ", check-in: " + sdf.format(checkin) + ", check-out: " + ", " + duration()
+		return "Room " + roomNumber + ", check-in: " + sdf.format(checkIn) + ", check-out: " + ", " + duration()
 				+ " nights";
 
 	}
